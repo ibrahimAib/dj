@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Page;
 use Dflydev\DotAccessData\Data;
 use Illuminate\Http\Request;
+use ZipArchive;
+use File;
 
 class PageController extends Controller
 {
@@ -15,7 +17,8 @@ class PageController extends Controller
      */
     public function index()
     {
-        //
+        $data = Page::all();
+        return view('home', compact('data'));
     }
 
     /**
@@ -25,7 +28,7 @@ class PageController extends Controller
      */
     public function create()
     {
-        //
+        return view('create');
     }
 
     /**
@@ -39,35 +42,59 @@ class PageController extends Controller
         $data = request();
         $folder = $data['name'];
 
+        if (is_dir('storage/Dj/downloads') === false) {
+            mkdir('storage/DJ/downloads');
+        }
+        if (is_dir('storage/Dj/' . $folder) === false) {
+            mkdir('storage/DJ/' . $folder);
+        }
         $img_path = request('img_path');
-        $ar = count($img_path);
-        foreach ($img_path as $da) {
-            $da->store('DJ/' . $folder, 'public');
-            $img_path[] = $da->store('uplode', 'public');
-        }
-        // en description
-        $myfile_en = 'storage/' . 'DJ/' . $folder . '/' . 'desceiption.txt';
-        file_put_contents($myfile_en, $data['description']);
-
-        // ar description
-        $myfile_ar = 'storage/' . 'DJ/' .  $folder . '/' . 'desceiption_ar.txt';
-        file_put_contents($myfile_ar, $data['description_ar']);
-        $revers = array_reverse($img_path, true);
-        $i = 0;
-        foreach ($revers as $da) {
-            if ($ar > $i) {
-                $re[] = $da;
+        if ($img_path != false) {
+            $ar = count($img_path);
+            foreach ($img_path as $da) {
+                $da->store('DJ/' . $folder, 'public');
+                $img_path[] = $da->store('uplode', 'public');
             }
-            $i++;
+            $revers = array_reverse($img_path, true);
+            $i = 0;
+            foreach ($revers as $da) {
+                if ($ar > $i) {
+                    $re[] = $da;
+                }
+                $i++;
+            }
+        } else {
+            $ar = 0;
         }
-
         for ($x = 12;; $x--) {
             if ($x <= $ar) {
                 break;
             }
             $re[] = null;
         }
+
+        // en description
+        $myfile_en = 'storage/' . 'DJ/' . $folder . '/' . 'aa_desceiption.txt';
+        file_put_contents($myfile_en, $data['description']);
+
+        // ar description
+        if ($data['description_ar'] != null) {
+            $myfile_ar = 'storage/' . 'DJ/' .  $folder . '/' . 'aa_desceiption_ar.txt';
+            file_put_contents($myfile_ar, $data['description_ar']);
+        }
         // dd($re);
+
+        $zip = new ZipArchive;
+        $fileadd = 'storage/' . 'DJ/' .  $folder;
+        if ($zip->open(public_path('storage/' . 'DJ/downloads/' .  $folder . '.zip'), ZipArchive::CREATE) === true) {
+            $files = File::files(public_path($fileadd));
+            foreach ($files as $key => $value) {
+                $relativeNameInZipFile = basename($value);
+                $zip->addFile($value, $relativeNameInZipFile);
+            }
+            $zip->close();
+        }
+
         Page::create([
             'name' => $data['name'],
             'name_ar' => $data['name_ar'],
@@ -86,7 +113,7 @@ class PageController extends Controller
             'img_path_10' => $re[9],
             'img_path_11' => $re[10],
         ]);
-        return back();
+        return redirect('/');
     }
 
     /**
@@ -135,6 +162,10 @@ class PageController extends Controller
     }
     public function download(Page $page)
     {
-        readfile('storage/DJ/' . $page->name);
+        // dd($pa)
+        $fileadd = 'storage/DJ/downloads/' . $page->name;
+        return
+            response()->download(public_path($fileadd . '.zip'));
+        back();
     }
 }

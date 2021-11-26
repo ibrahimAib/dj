@@ -1,0 +1,18 @@
+pre {
+    white-space: pre-wrap;
+
+    overflow: hidden;
+    /* font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; */
+    font-size: 20px
+}
+    .A4 .height{
+        
+    }
+    .fc-gray h6{
+        color: rgb(170, 170, 170);
+    }
+    .image img{
+        max-width: 100%;
+        height: auto;
+        margin-top: 5px
+    }

@@ -2,10 +2,19 @@
 @section('content')
     
 <div class="container">
-    <div class="d-flex justify-content-center">
+    <div class="py-5 d-flex justify-content-center">
+        <h1>ADD</h1>
+    </div>
+    <div class="">
         <form action="/page" method="POST" enctype="multipart/form-data">
             @csrf
-        <input type="file" name="img_path[]" class="form-control" multiple>
+        <div class="input-group mb-3">
+            <div class="custom-file">
+              <input type="file" name="img_path[]" class="custom-file-input" id="inputGroupFile02" multiple>
+              <label class="custom-file-label" for="inputGroupFile02" aria-describedby="inputGroupFileAddon02">Choose file</label>
+            </div>
+          </div>
+
         <div>
             <div class="d-flex justify-content-between">
                 <span class="pt-2 ml-1">name</span>
